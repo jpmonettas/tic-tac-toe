@@ -1,0 +1,21 @@
+table{
+    margin: auto;
+    font-size: 90px;
+}
+
+table td{
+    width: 100px;
+    height: 100px;
+    border: 1px solid;
+}
+
+table td.x{
+    color: blue;
+}
+
+table td.o{
+    color: red;
+}
+
+
+
