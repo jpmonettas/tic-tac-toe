@@ -1,16 +1,15 @@
-(ns tic-tac-toe.core)
+(ns tic-tac-toe.core
+  (:require [tic-tac-toe.utils :as u]))
 
-(def other-player {:x :o :o :x})
+(def board (u/index-board
+            '[[x ? x]
+              [? ? x]
+              [x ? ?]]))
 
 
 (defn winner [board]
-  (let [h board
-        v (apply (partial map list) board)
-        d (let [[[a _ b]
-                 [_ c _]
-                 [d _ e]] board] [[a c e] [b c d]])
-        all (concat h v d)
-        win? (fn [[a b c]] (and (= a b c) (not= a :e)))]
+  (let [all (u/all-lines board)
+        win? (fn [[a b c]] (and (= a b c) (not= a '?)))]
     (->> (filter win? all) first first)))
 
 (defn update-game-status [game]
@@ -22,13 +21,10 @@
 
 (defn play [{:keys [board player-turn status]:as game} r c]
   (if (and (= status :playing)
-         (= :e (get-in board [r c])))
+         (= '? (get-in board [r c])))
     (-> game
        (assoc-in [:board r c] player-turn)
-       (update-in [:player-turn] other-player)
+       (update-in [:player-turn] u/other-player)
        (update-game-status))
 
     game))
-
-
- 
