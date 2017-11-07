@@ -8,8 +8,7 @@
   [board player]
   (let [winner-coords (->> (u/player-holes board player)
                            (map (comp :coord meta u/hole)))]
-    (when (not-empty winner-coords)
-      (assoc-in board (first winner-coords) player))))
+    (first winner-coords)))
 
 (defn block
   "If the opponent has two in a row,
@@ -17,8 +16,7 @@
   [board player]
   (let [looser-coords (->> (u/player-holes board (u/other-player player))
                            (map (comp :coord meta u/hole)))]
-    (when (not-empty looser-coords)
-      (assoc-in board (first looser-coords) player))))
+    (first looser-coords)))
 
 (defn future-fork-coords
   "Given a board and a future board returns fork coord if it generated a fork
@@ -38,8 +36,7 @@
   (let [fork-coord (->> (u/future-boards board player)
                         (keep #(future-fork-coords board % player))
                         first)]
-    (when fork-coord
-      (assoc-in board fork-coord player))))
+    fork-coord))
 
 (defn block-opponent-fork-1
   "The player should create two in a row to force the opponent into defending,
@@ -56,8 +53,7 @@
   (let [enemy-fork-coord (->> (u/future-boards board (u/other-player player))
                               (keep #(future-fork-coords board % (u/other-player player)))
                               first)]
-    (when enemy-fork-coord
-      (assoc-in board enemy-fork-coord player))))
+    enemy-fork-coord))
 
 (defn center
   "A player marks the center. 
@@ -81,8 +77,8 @@
                              (map (comp :coord meta)))]
     ;; TODO, do it with oposite corner instead of first free
     (when (and (not-empty free-corners)
-             (not-empty oponent-corners))
-      (assoc-in board (first free-corners) player))))
+               (not-empty oponent-corners))
+      (first free-corners))))
 
 
 (defn empty-corner
@@ -91,8 +87,7 @@
   (let [free-corner (->> (u/corners board)
                          (filter #(= % '? ))
                          first meta :coord)]
-    (when free-corner
-      (assoc-in board free-corner player))))
+    free-corner))
 
 (defn empty-side
   "Empty side: The player plays in a middle square on any of the 4 sides"
@@ -100,8 +95,7 @@
   (let [free-side (->> (u/sides board)
                        (filter #(= % '? ))
                        first meta :coord)]
-    (when free-side
-      (assoc-in board free-side player))))
+    free-side))
 
 
 (def wiki-strategy [win
@@ -116,9 +110,10 @@
 
 (comment
 
-  (u/try-rules '[[x ? x]
+  (u/play-rules '[[x ? x]
                  [? ? x]
                  [x ? ?]]
                'x
-               wiki-strategy
-               ))
+               wiki-strategy)
+
+  )

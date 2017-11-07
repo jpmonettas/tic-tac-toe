@@ -45,9 +45,9 @@
       count
       inc))
 
-(defn try-rules [board player [rule & rest-of-rules]]
-  (if-let [new-board (rule board player)]
-    new-board
+(defn play-rules [board player [rule & rest-of-rules]]
+  (if-let [coords (rule board player)]
+    coords
     (when rest-of-rules
       (recur board player rest-of-rules))))
 
@@ -78,3 +78,6 @@
        all-lines
        (filter hole)
        (filter #(some (partial = player) %))))
+
+(defn board-play [board coord player]
+  (assoc-in board coord (with-meta player {:coord coord})))

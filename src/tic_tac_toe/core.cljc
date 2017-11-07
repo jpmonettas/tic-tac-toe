@@ -1,10 +1,15 @@
 (ns tic-tac-toe.core
-  (:require [tic-tac-toe.utils :as u]))
+  (:require [tic-tac-toe.utils :as u]
+            [tic-tac-toe.wiki-strategy :refer [wiki-strategy]]))
 
-(def board (u/index-board
-            '[[x ? x]
-              [? ? x]
-              [x ? ?]]))
+(def empty-board (u/index-board
+                  '[[? ? ?]
+                    [? ? ?]
+                    [? ? ?]]))
+
+(def empty-game {:board empty-board
+                 :player-turn 'x
+                 :status :playing})
 
 
 (defn winner [board]
@@ -19,12 +24,14 @@
        (assoc :winner w))
     game))
 
-(defn play [{:keys [board player-turn status]:as game} r c]
+(defn play [{:keys [board player-turn status] :as game} r c]
   (if (and (= status :playing)
-         (= '? (get-in board [r c])))
+           (= '? (get-in board [r c])))
     (-> game
-       (assoc-in [:board r c] player-turn)
-       (update-in [:player-turn] u/other-player)
-       (update-game-status))
+        (update :board u/board-play [r c] player-turn)
+        (update-in [:player-turn] u/other-player)
+        (update-game-status))
 
     game))
+
+#_(u/play-rules empty-board 'o wiki-strategy)
