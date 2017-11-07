@@ -11,7 +11,6 @@
                  :player-turn 'x
                  :status :playing})
 
-
 (defn winner [board]
   (let [all (u/all-lines board)
         win? (fn [[a b c]] (and (= a b c) (not= a '?)))]
@@ -33,5 +32,3 @@
         (update-game-status))
 
     game))
-
-#_(u/play-rules empty-board 'o wiki-strategy)

@@ -6,29 +6,28 @@
   "If the player has two in a row,
   they can place a third to get three in a row."
   [board player]
-  (let [winner-coords (->> (u/player-holes board player)
-                           (map (comp :coord meta u/hole)))]
+  (let [winner-coords (->> (u/player-holes-lines board player)
+                           (map #(-> % u/line-hole meta :coord)))]
     (first winner-coords)))
 
 (defn block
   "If the opponent has two in a row,
   the player must play the third themselves to block the opponent."
   [board player]
-  (let [looser-coords (->> (u/player-holes board (u/other-player player))
-                           (map (comp :coord meta u/hole)))]
+  (let [looser-coords (->> (u/player-holes-lines board (u/other-player player))
+                           (map #(-> % u/line-hole meta :coord)))]
     (first looser-coords)))
 
 (defn future-fork-coords
   "Given a board and a future board returns fork coord if it generated a fork
   for the player"
-  [board future-board player]
-  (let [current-holes (u/player-holes future-board player)
-        future-holes (u/player-holes board player)]
-    (when (>= (- (count future-holes) (count current-holes))
+  [board [coord future-board] player]
+  (let [current-holes-lines (u/player-holes-lines future-board player)
+        future-holes-lines (u/player-holes-lines board player)]
+    ;; if the play in future-board generates a fork 
+    (when (>= (- (count future-holes-lines) (count current-holes-lines))
               2)
-      (let [[cline fline] (u/first-difference current-holes future-holes)
-            [ce _]  (u/first-difference cline fline)]
-        (-> ce meta :coord)))))
+      coord)))
 
 (defn fork
   "Create an opportunity where the player has two threats to win (two non-blocked lines of 2)."
@@ -64,22 +63,23 @@
   ;; TODO understand this
   )
 
-
 (defn opposite-corner
   "Opposite corner: If the opponent is in the corner, the player plays the opposite corner."
   [board player]
-  (let [corners (u/corners board)
+  (let [size (dec (count board))
+        oposite (fn  [x] (if (= x size) 0 size))
+        corners (u/corners board)
         free-corners (->> corners
                           (filter #(= % '? ))
-                          (map (comp :coord meta)))
-        oponent-corners (->> corners
-                             (filter #(= % (u/other-player player)))
-                             (map (comp :coord meta)))]
-    ;; TODO, do it with oposite corner instead of first free
-    (when (and (not-empty free-corners)
-               (not-empty oponent-corners))
-      (first free-corners))))
-
+                          (map (comp :coord meta))
+                          (into #{}))
+        oponent-oposite-free-corners (->> corners
+                                          (filter #(= % (u/other-player player)))
+                                          (map (comp :coord meta))
+                                          (map (fn [[r c]] [(oposite r) (oposite c)]))
+                                          (filter free-corners))]
+    (when oponent-oposite-free-corners
+      (first oponent-oposite-free-corners))))
 
 (defn empty-corner
   "Empty corner: The player plays in a corner square."
@@ -107,13 +107,3 @@
                     opposite-corner
                     empty-corner
                     empty-side])
-
-(comment
-
-  (u/play-rules '[[x ? x]
-                 [? ? x]
-                 [x ? ?]]
-               'x
-               wiki-strategy)
-
-  )

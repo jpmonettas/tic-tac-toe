@@ -13,9 +13,9 @@
 (defn forward-state [gs row col]
   (let [game' (-> (last gs)
                   (play row col))
-        [ai-row ai-col] (u/play-rules (:board game')
-                                      (:player-turn game')
-                                      wiki-strategy)
+        [ai-row ai-col] (u/first-success wiki-strategy
+                                         (:board game')
+                                         (:player-turn game'))
         game'' (play game' ai-row ai-col)]
     (conj gs game'')))
  
